@@ -1,4 +1,5 @@
 import json
+import math
 import os
 import random
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -11,7 +12,6 @@ routes = list(hketa.route_list.items())
 
 
 def parse_datetime(datetime_str):
-    # Formats to try parsing the datetime strings
     formats = [
         "%Y-%m-%dT%H:%M:%S.%f%z",
         "%Y-%m-%dT%H:%M:%S%z"
@@ -32,6 +32,18 @@ def seconds_diff(time1, time2):
     return delta.total_seconds()
 
 
+def haversine(lat1, lon1, lat2, lon2):
+    lat1_rad = math.radians(lat1)
+    lon1_rad = math.radians(lon1)
+    lat2_rad = math.radians(lat2)
+    lon2_rad = math.radians(lon2)
+    dlat = lat2_rad - lat1_rad
+    dlon = lon2_rad - lon1_rad
+    a = math.sin(dlat / 2) ** 2 + math.cos(lat1_rad) * math.cos(lat2_rad) * math.sin(dlon / 2) ** 2
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+    return 6371.0 * c
+
+
 def run():
     key, route = random.choice(routes)
     if "stops" not in route:
@@ -43,15 +55,22 @@ def run():
     if len(stop_ids) < 2:
         return
     stop_index = random.randint(0, len(stop_ids) - 1)
-    etas1 = hketa.getEtas(route_id=key, seq=stop_index, language="en")
-    etas2 = hketa.getEtas(route_id=key, seq=stop_index + 1, language="en")
-    if etas1 is None or etas2 is None or len(etas1) == 0 or len(etas2) == 0 or etas1[0]["eta"] is None or etas2[0]["eta"] is None:
-        return
-    eta_time1 = etas1[0]["eta"]
-    eta_time2 = etas2[0]["eta"]
-    diff = seconds_diff(eta_time1, eta_time2)
+
     stop_id1 = stop_ids[stop_index]
     stop_id2 = stop_ids[stop_index + 1]
+    pos1 = hketa.stop_list[stop_id1]["location"]
+    pos2 = hketa.stop_list[stop_id2]["location"]
+    distance = haversine(pos1["lat"], pos1["lng"], pos2["lat"], pos2["lng"])
+    if distance > 1.5:
+        diff = distance / 50
+    else:
+        etas1 = hketa.getEtas(route_id=key, seq=stop_index, language="en")
+        etas2 = hketa.getEtas(route_id=key, seq=stop_index + 1, language="en")
+        if etas1 is None or etas2 is None or len(etas1) == 0 or len(etas2) == 0 or etas1[0]["eta"] is None or etas2[0]["eta"] is None:
+            return
+        eta_time1 = etas1[0]["eta"]
+        eta_time2 = etas2[0]["eta"]
+        diff = seconds_diff(eta_time1, eta_time2)
 
     file_path = "times/" + stop_id1[0:2] + ".json"
     dir_name = os.path.dirname(file_path)
