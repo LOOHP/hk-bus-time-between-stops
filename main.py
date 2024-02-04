@@ -78,11 +78,15 @@ def run():
 
 
 def run_repeatedly():
-    try:
-        while True:
+    while True:
+        try:
             run()
-    except KeyboardInterrupt:
-        print("Program terminated by user")
+        except KeyboardInterrupt:
+            print("Program terminated by user")
+            break
+        except Exception as e:
+            print(e)
+            continue
 
 
 def main():
