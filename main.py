@@ -1,4 +1,3 @@
-import itertools
 import json
 import os
 import random
@@ -74,7 +73,7 @@ def run():
     except FileNotFoundError:
         pass
     with open(file_path, 'w') as file:
-        json.dump(data, file, indent=4)
+        json.dump(data, file)
     print(stop_id1 + " > " + stop_id2)
 
 
