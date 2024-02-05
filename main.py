@@ -2,13 +2,16 @@ import json
 import math
 import os
 import random
+import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
+from json import JSONDecodeError
 
 from eta import HKEta
 
 hketa = HKEta()
 routes = list(hketa.route_list.items())
+file_lock = threading.Lock()
 
 
 def parse_datetime(datetime_str):
@@ -72,27 +75,30 @@ def run():
         eta_time2 = etas2[0]["eta"]
         diff = seconds_diff(eta_time1, eta_time2)
 
-    file_path = "times/" + stop_id1[0:2] + ".json"
-    dir_name = os.path.dirname(file_path)
-    if not os.path.exists(dir_name):
-        os.makedirs(dir_name, exist_ok=True)
-    data = {stop_id1: {stop_id2: diff}}
-    try:
-        with open(file_path, 'r') as file:
-            data = json.load(file)
-            if stop_id1 in data:
-                times = data[stop_id1]
-                if stop_id2 in times:
-                    time = times[stop_id2]
-                    times[stop_id2] = (time + diff) / 2
+    with file_lock:
+        file_path = "times/" + stop_id1[0:2] + ".json"
+        dir_name = os.path.dirname(file_path)
+        if not os.path.exists(dir_name):
+            os.makedirs(dir_name, exist_ok=True)
+        data = {stop_id1: {stop_id2: diff}}
+        try:
+            with open(file_path, 'r') as file:
+                data = json.load(file)
+                if stop_id1 in data:
+                    times = data[stop_id1]
+                    if stop_id2 in times:
+                        time = times[stop_id2]
+                        times[stop_id2] = (time + diff) / 2
+                    else:
+                        times[stop_id2] = diff
                 else:
-                    times[stop_id2] = diff
-            else:
-                data[stop_id1] = {stop_id2: diff}
-    except FileNotFoundError:
-        pass
-    with open(file_path, 'w') as file:
-        json.dump(data, file)
+                    data[stop_id1] = {stop_id2: diff}
+        except FileNotFoundError:
+            pass
+        except JSONDecodeError:
+            pass
+        with open(file_path, 'w') as file:
+            json.dump(data, file)
     print(stop_id1 + " > " + stop_id2)
 
 
