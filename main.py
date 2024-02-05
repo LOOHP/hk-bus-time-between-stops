@@ -74,6 +74,8 @@ def run():
         eta_time1 = etas1[0]["eta"]
         eta_time2 = etas2[0]["eta"]
         diff = seconds_diff(eta_time1, eta_time2)
+    if diff < 0:
+        return
 
     with file_lock:
         file_path = "times/" + stop_id1[0:2] + ".json"
@@ -88,7 +90,10 @@ def run():
                     times = data[stop_id1]
                     if stop_id2 in times:
                         time = times[stop_id2]
-                        times[stop_id2] = (time + diff) / 2
+                        if time < 0:
+                            times[stop_id2] = diff
+                        else:
+                            times[stop_id2] = (time + diff) / 2
                     else:
                         times[stop_id2] = diff
                 else:
