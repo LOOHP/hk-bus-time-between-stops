@@ -57,7 +57,7 @@ def run():
     co, stop_ids = random.choice(list(stops.items()))
     if len(stop_ids) < 2:
         return
-    stop_index = random.randint(0, len(stop_ids) - 1)
+    stop_index = random.randint(0, len(stop_ids) - 2)
 
     stop_id1 = stop_ids[stop_index]
     stop_id2 = stop_ids[stop_index + 1]
