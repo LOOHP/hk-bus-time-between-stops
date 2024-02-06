@@ -93,7 +93,8 @@ def run():
                         if time < 0 or (distance > 1.5 and time < min(2.0, diff)):
                             times[stop_id2] = diff
                         else:
-                            times[stop_id2] = (time + diff) / 2
+                            diff = (time + diff) / 2
+                            times[stop_id2] = diff
                     else:
                         times[stop_id2] = diff
                 else:
@@ -104,7 +105,7 @@ def run():
             pass
         with open(file_path, 'w') as file:
             json.dump(data, file)
-    print(stop_id1 + " > " + stop_id2)
+    print(f"{f'{stop_id1} > {stop_id2}':<35} {distance:.2f}km {(diff / 60):.2f}mins")
 
 
 def run_repeatedly():
