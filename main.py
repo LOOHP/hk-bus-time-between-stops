@@ -90,7 +90,7 @@ def run():
                     times = data[stop_id1]
                     if stop_id2 in times:
                         time = times[stop_id2]
-                        if time < 0:
+                        if time < 0 or (distance > 1.5 and time < min(2.0, diff)):
                             times[stop_id2] = diff
                         else:
                             times[stop_id2] = (time + diff) / 2
