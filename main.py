@@ -65,7 +65,7 @@ def run():
     pos2 = hketa.stop_list[stop_id2]["location"]
     distance = haversine(pos1["lat"], pos1["lng"], pos2["lat"], pos2["lng"])
     if distance > 1.5:
-        diff = distance / 50
+        diff = distance / 0.013636
     else:
         etas1 = hketa.getEtas(route_id=key, seq=stop_index, language="en")
         etas2 = hketa.getEtas(route_id=key, seq=stop_index + 1, language="en")
