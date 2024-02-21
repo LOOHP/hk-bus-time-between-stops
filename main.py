@@ -93,7 +93,7 @@ def run():
                         if time < 0 or (distance > 1.5 and time < min(2.0, diff)):
                             times[stop_id2] = diff
                         else:
-                            diff = (time + diff) / 2
+                            diff = (time * 9 + diff) / 10
                             times[stop_id2] = diff
                     else:
                         times[stop_id2] = diff
