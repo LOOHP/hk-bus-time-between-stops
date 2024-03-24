@@ -76,8 +76,9 @@ def run():
         diff = seconds_diff(eta_time1, eta_time2)
     if diff < 0:
         return
+    diff *= 1.1
     if "lightRail" in route["co"]:
-        diff = max(60.0, diff)
+        diff = max(120.0, diff)
 
     with file_lock:
         file_path = "times/" + stop_id1[0:2] + ".json"
